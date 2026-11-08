@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixel AI Editor</title>
-  <meta name="description" content="DeepSeek がラフを描き、自分で仕上げる。16/32/64px のドット絵エディタ。Claude から MCP で操作も可能。" />
+  <meta name="description" content="AI がラフを描き、自分で仕上げる。16/32/64px のドット絵エディタ。Claude から MCP で操作も可能。" />
   <meta property="og:title" content="Pixel AI Editor" />
   <meta property="og:description" content="AI がラフを描き、自分で仕上げるドット絵エディタ" />
   <meta property="og:image" content="https://motchan2000.github.io/pixel-ai-editor/screenshot.png" />
@@ -134,12 +134,12 @@
     <div class="hero wrap">
       <img class="logo" src="icon.png" alt="Pixel AI Editor のアイコン（ドット絵のスライム）" />
       <h1 class="pixel">AI がラフを描き、<br />あなたが仕上げる。</h1>
-      <p class="lead">16×16・32×32・64×64 のドット絵エディタ。お題を書けば DeepSeek が下絵を描き、そのまま自分の手で直せます。Claude から MCP で操作することも。</p>
+      <p class="lead">16×16・32×32・64×64 のドット絵エディタ。お題を書けば AI が下絵を描き、そのまま自分の手で直せます。Claude から MCP で操作することも。</p>
       <div class="cta">
         <a class="btn primary" href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">⬇ Windows版をダウンロード</a>
         <a class="btn" href="https://github.com/motchan2000/pixel-ai-editor">GitHub で見る</a>
       </div>
-      <p class="note">Windows 10/11 (x64)・無料・MIT ライセンス／AI 機能には DeepSeek の APIキーが必要です</p>
+      <p class="note">Windows 10/11 (x64)・無料・MIT ライセンス／AI 機能には各サービスの APIキーが必要です（ローカルLLMならキー不要）</p>
       <div class="shot"><img src="screenshot.png" alt="エディタの画面。中央のキャンバスに緑のスライムのドット絵、右側に AI ラフ生成とカラーパレットのパネル" /></div>
     </div>
 
@@ -153,7 +153,7 @@
           <div class="card"><div class="ic">🫥</div><h3>下絵モード</h3><p>AI のラフを半透明で重ねて表示。上からなぞって自分の線で描き直せます。</p></div>
           <div class="card"><div class="ic">🔌</div><h3>MCP 対応</h3><p>Claude Code / Claude Desktop から描画・確認・書き出し。起動中のアプリにリアルタイムで反映。</p></div>
           <div class="card"><div class="ic">🖼️</div><h3>PNG 書き出し</h3><p>等倍・×8・×16 で書き出し。作業途中はプロジェクトファイルで保存できます。</p></div>
-          <div class="card"><div class="ic">🔒</div><h3>キーはローカルに</h3><p>APIキーはあなたの PC にだけ保存。通信は DeepSeek API とだけ行います。</p></div>
+          <div class="card"><div class="ic">🔒</div><h3>キーはローカルに</h3><p>APIキーはあなたの PC にだけ保存。通信は選んだ AI サービスとだけ行います。</p></div>
         </div>
       </div>
     </section>
@@ -164,7 +164,7 @@
         <p class="sub">インストールから最初の 1 枚まで、数分で。</p>
         <ol class="steps">
           <li><b>インストーラーをダウンロードして実行</b><span><a href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">Releases</a> の <code>Pixel-AI-Editor-Setup-x.y.z.exe</code>。SmartScreen の警告が出たら「詳細情報」→「実行」。</span></li>
-          <li><b>DeepSeek の APIキーを設定</b><span><a href="https://platform.deepseek.com/api_keys">platform.deepseek.com</a> でキーを作り、アプリ右下の「APIキー設定」に貼り付けて保存。</span></li>
+          <li><b>AI サービスを選んでキーを設定</b><span>アプリ右下の「AI設定」で DeepSeek・OpenAI・Claude・Gemini・OpenRouter・Ollama などから選び、APIキーを貼り付けて保存。OpenAI 互換 API なら何でも使えます。</span></li>
           <li><b>サイズを選んでお題を入力</b><span>16 / 32 / 64 から選び、「ラフを生成」。数秒〜1分ほどでキャンバスに下絵が届きます。</span></li>
           <li><b>手直しして書き出し</b><span>気になるところを直して「PNG書き出し」。Ctrl+Z でいつでも戻れます。</span></li>
         </ol>

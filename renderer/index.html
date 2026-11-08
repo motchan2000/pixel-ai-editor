@@ -62,7 +62,7 @@
 
     <aside class="side">
       <div class="panel">
-        <h2>🤖 DeepSeek でラフ生成</h2>
+        <h2>🤖 AIでラフ生成</h2>
         <textarea id="prompt" rows="3" placeholder="例: 青い剣を持った小さな騎士、正面向き"></textarea>
         <div class="row">
           <label>最大色数
@@ -94,20 +94,33 @@
       </div>
 
       <div class="panel small">
-        <h2>🔌 MCP連携（Claude から操作）</h2>
+        <h2>🔌 MCP連携</h2>
         <div class="row wrap">
-          <button id="btn-copy-mcp-code">Claude Code 用コマンド</button>
-          <button id="btn-copy-mcp-desktop">Claude Desktop 用JSON</button>
+          <button id="btn-copy-mcp-code">登録コマンドをコピー</button>
+          <button id="btn-copy-mcp-desktop">設定JSONをコピー</button>
         </div>
         <div id="mcp-copy-status" class="status"></div>
       </div>
 
       <div class="panel small">
-        <h2>🔑 APIキー設定</h2>
-        <div id="key-status" class="status"></div>
+        <h2>🔑 AI設定</h2>
+        <div class="form">
+          <label>サービス
+            <select id="ai-provider"></select>
+          </label>
+          <label id="ai-baseurl-row">ベースURL
+            <input type="text" id="ai-baseurl" placeholder="https://.../v1" spellcheck="false" />
+          </label>
+          <label>モデル
+            <input type="text" id="ai-model" placeholder="モデル名" spellcheck="false" />
+          </label>
+          <label id="ai-key-row">APIキー
+            <input type="password" id="ai-key" placeholder="変更しない場合は空欄" />
+          </label>
+        </div>
         <div class="row">
-          <input type="password" id="api-key" placeholder="sk-..." />
-          <button id="btn-save-key">保存</button>
+          <div id="key-status" class="status grow"></div>
+          <button id="btn-save-ai" class="primary">保存</button>
         </div>
       </div>
     </aside>

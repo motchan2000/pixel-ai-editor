@@ -178,16 +178,46 @@ $('#btn-open').onclick = async () => {
   }
 };
 
-// ---------- APIキー ----------
-async function refreshKeyStatus() {
-  const s = await window.api.settingsStatus();
-  const msg = s.source === 'settings' ? '設定済み（アプリに保存）' : s.source === 'env' ? '設定済み（.env から読み込み）' : '未設定です。DeepSeekのAPIキーを入力してください';
-  setStatus($('#key-status'), msg, s.hasKey ? 'ok' : 'error');
+// ---------- AI設定 ----------
+let aiSettings = null;
+
+function showProvider(id) {
+  const p = aiSettings.providers[id];
+  $('#ai-baseurl-row').style.display = p.protocol === 'anthropic' ? 'none' : '';
+  $('#ai-key-row').style.display = '';
+  $('#ai-baseurl').value = p.baseUrl || '';
+  $('#ai-model').value = p.model || '';
+  $('#ai-key').value = '';
+  $('#ai-key').placeholder = p.keySource === 'none' ? (p.noKey ? '不要（必要な場合のみ入力）' : 'APIキーを入力') : '変更しない場合は空欄';
+  const msg = p.keySource === 'settings' ? 'キー設定済み' :
+    p.keySource === 'env' ? 'キー設定済み（環境変数）' :
+    p.noKey ? 'キー不要（ローカル）' : 'APIキーが未設定です';
+  setStatus($('#key-status'), msg, p.keySource !== 'none' || p.noKey ? 'ok' : 'error');
 }
-$('#btn-save-key').onclick = async () => {
-  await window.api.setApiKey($('#api-key').value);
-  $('#api-key').value = '';
-  refreshKeyStatus();
+
+async function loadAiSettings() {
+  aiSettings = await window.api.getAiSettings();
+  const sel = $('#ai-provider');
+  sel.replaceChildren(...Object.entries(aiSettings.providers).map(([id, p]) => {
+    const o = document.createElement('option');
+    o.value = id; o.textContent = p.label;
+    return o;
+  }));
+  sel.value = aiSettings.provider;
+  showProvider(aiSettings.provider);
+}
+$('#ai-provider').onchange = (e) => showProvider(e.target.value);
+$('#btn-save-ai').onclick = async () => {
+  const id = $('#ai-provider').value;
+  const key = $('#ai-key').value;
+  aiSettings = await window.api.saveAiSettings({
+    provider: id,
+    baseUrl: $('#ai-baseurl').value,
+    model: $('#ai-model').value,
+    apiKey: key ? key : undefined,
+  });
+  showProvider(id);
+  setStatus($('#key-status'), `保存しました（${aiSettings.providers[id].label}）`, 'ok');
 };
 
 // ---------- MCP 登録用の設定をコピー ----------
@@ -202,7 +232,7 @@ $('#btn-copy-mcp-desktop').onclick = async () => {
   const c = await window.api.mcpConfig();
   const json = JSON.stringify({ mcpServers: { 'pixel-editor': c } }, null, 2);
   await window.api.copy(json);
-  setStatus($('#mcp-copy-status'), 'コピーしました。%APPDATA%\\Claude\\claude_desktop_config.json の mcpServers に追記してください。', 'ok');
+  setStatus($('#mcp-copy-status'), 'コピーしました。MCPクライアントの設定ファイルの mcpServers に追記してください。', 'ok');
 };
 
 // ---------- MCP (renderer/mcp.js) から使う関数 ----------
@@ -213,4 +243,4 @@ window.appSetGenStatus = (text, cls) => setStatus($('#gen-status'), text, cls);
 // ---------- 起動 ----------
 editor.setSize(16);
 setColor('#000000');
-refreshKeyStatus();
+loadAiSettings();

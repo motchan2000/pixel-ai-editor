@@ -1,8 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-  settingsStatus: () => ipcRenderer.invoke('settings:status'),
-  setApiKey: (key) => ipcRenderer.invoke('settings:setKey', key),
+  getAiSettings: () => ipcRenderer.invoke('ai:getSettings'),
+  saveAiSettings: (s) => ipcRenderer.invoke('ai:saveSettings', s),
   generate: (opts) => ipcRenderer.invoke('ai:generate', opts),
   savePng: (dataUrl, defaultName) => ipcRenderer.invoke('file:savePng', { dataUrl, defaultName }),
   saveProject: (json, defaultName) => ipcRenderer.invoke('file:saveProject', { json, defaultName }),

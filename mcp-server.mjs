@@ -179,8 +179,8 @@ server.registerTool('redo', { title: 'やり直し', description: '取り消し�
   wrap(async () => text(await call('redo'))));
 
 server.registerTool('generate_rough', {
-  title: 'DeepSeek でラフ生成',
-  description: 'アプリに設定された DeepSeek API でラフを生成し、キャンバスに適用する（数十秒かかることがある）。',
+  title: 'AI でラフ生成',
+  description: 'アプリの「AI設定」で選ばれている AI サービスでラフを生成し、キャンバスに適用する（数十秒かかることがある）。',
   inputSchema: {
     prompt: z.string().describe('描くもの（例: 赤いスライム）'),
     size: z.union([z.literal(16), z.literal(32), z.literal(64)]).optional().describe('省略時は現在のサイズ'),

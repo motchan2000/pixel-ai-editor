@@ -1,11 +1,11 @@
 {
   "name": "pixel-ai-editor",
-  "version": "1.0.0",
-  "description": "DeepSeekがラフを描くドット絵エディタ",
+  "version": "1.1.0",
+  "description": "AIがラフを描き、自分で仕上げるドット絵エディタ",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node test/parse.test.js",
+    "test": "node test/parse.test.js && node test/openai-compat.test.js",
     "mcp": "node mcp-server.mjs",
     "dist": "electron-builder --win nsis"
   },
@@ -15,6 +15,7 @@
     "electron-builder": "^26.18.0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^4.6.7"
   },
@@ -39,7 +40,7 @@
     "files": [
       "main.js",
       "preload.js",
-      "deepseek.js",
+      "ai.js",
       "bridge.js",
       "mcp-server.mjs",
       "renderer/**",

@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { parseRough, normalizeColor } = require('../deepseek');
+const { parseRough, normalizeColor } = require('../ai');
 
 assert.strictEqual(normalizeColor('#ABC'), '#aabbcc');
 assert.strictEqual(normalizeColor('ff0000'), '#ff0000');

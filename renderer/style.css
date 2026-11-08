@@ -121,6 +121,13 @@ main { flex: 1; display: flex; min-height: 0; }
 .row input[type=number] { width: 56px; }
 .row input[type=password] { flex: 1; min-width: 0; }
 #btn-generate { margin-left: auto; }
+.form { display: flex; flex-direction: column; gap: 6px; }
+.form label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--muted); }
+.form input, .form select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 8px; font-size: 12px; color: var(--text); user-select: text;
+}
+.status.grow { flex: 1; margin-top: 0; }
 .row.wrap { flex-wrap: wrap; gap: 6px; }
 .row.wrap button { font-size: 12px; padding: 5px 8px; }
 .status { font-size: 11px; color: var(--muted); margin-top: 6px; white-space: pre-wrap; word-break: break-all; }
