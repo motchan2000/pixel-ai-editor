@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel AI Editor</title>
+  <meta name="description" content="DeepSeek がラフを描き、自分で仕上げる。16/32/64px のドット絵エディタ。Claude から MCP で操作も可能。" />
+  <meta property="og:title" content="Pixel AI Editor" />
+  <meta property="og:description" content="AI がラフを描き、自分で仕上げるドット絵エディタ" />
+  <meta property="og:image" content="https://motchan2000.github.io/pixel-ai-editor/screenshot.png" />
+  <link rel="icon" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #16171d;
+      --bg2: #1e1f26;
+      --panel: #262833;
+      --border: #363948;
+      --text: #e8e9f0;
+      --muted: #9ea3b8;
+      --accent: #ff5c8a;
+      --green: #38b764;
+      --blue: #4f7cff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    .pixel { font-family: "DotGothic16", monospace; letter-spacing: .02em; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+    nav { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+    nav img { width: 32px; height: 32px; image-rendering: pixelated; }
+    nav .name { font-size: 18px; }
+    nav .links { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+    nav .links a { color: var(--muted); text-decoration: none; }
+    nav .links a:hover { color: var(--text); }
+
+    .hero { padding: 56px 0 40px; text-align: center; }
+    .hero img.logo { width: 112px; height: 112px; image-rendering: pixelated; }
+    .hero h1 { font-size: clamp(32px, 6vw, 56px); margin: 12px 0 8px; line-height: 1.2; }
+    .hero p.lead { font-size: clamp(16px, 2.4vw, 19px); color: var(--muted); margin: 0 auto 28px; max-width: 640px; }
+    .cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 8px; font-weight: 700; text-decoration: none;
+      border: 2px solid var(--border); color: var(--text); background: var(--panel);
+      transition: transform .1s, border-color .15s;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--muted); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 0 #b83a60; }
+    .btn.primary:hover { border-color: var(--accent); }
+    .btn.primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #b83a60; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    .shot { margin: 40px auto 0; max-width: 960px; }
+    .shot img {
+      width: 100%; height: auto; display: block; border-radius: 10px;
+      border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,.55);
+    }
+
+    section { padding: 64px 0; }
+    section h2 { font-size: clamp(24px, 4vw, 32px); margin: 0 0 8px; }
+    section .sub { color: var(--muted); margin: 0 0 32px; }
+
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+    .card .ic { font-size: 26px; }
+    .card h3 { margin: 8px 0 6px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .steps { counter-reset: step; display: grid; gap: 14px; padding: 0; margin: 0; list-style: none; }
+    .steps li {
+      counter-increment: step; position: relative; padding: 16px 18px 16px 64px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 16px; top: 14px;
+      width: 32px; height: 32px; display: grid; place-items: center;
+      background: var(--green); color: #fff; font-family: "DotGothic16", monospace; font-size: 18px;
+      box-shadow: 3px 3px 0 #1a6b3d;
+    }
+    .steps b { display: block; }
+    .steps span { color: var(--muted); font-size: 14px; }
+
+    .mcp { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    pre {
+      margin: 0; background: #0f1015; border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px; overflow-x: auto; font-size: 13px; line-height: 1.6; color: #cfd3e3;
+      font-family: "Cascadia Code", Consolas, monospace;
+    }
+    pre .c { color: #6c7290; }
+    pre .p { color: var(--accent); }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tools code {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+      padding: 3px 8px; font-size: 12px; color: var(--text);
+    }
+
+    footer { border-top: 1px solid var(--border); padding: 28px 0 40px; color: var(--muted); font-size: 13px; }
+    footer .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+
+    @media (max-width: 720px) {
+      nav .links { display: none; }
+      .mcp { grid-template-columns: 1fr; }
+      section { padding: 44px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <nav>
+      <img src="favicon.png" alt="" />
+      <span class="name pixel">Pixel AI Editor</span>
+      <div class="links">
+        <a href="#features">特長</a>
+        <a href="#start">はじめかた</a>
+        <a href="#mcp">MCP</a>
+        <a href="https://github.com/motchan2000/pixel-ai-editor">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero wrap">
+      <img class="logo" src="icon.png" alt="Pixel AI Editor のアイコン（ドット絵のスライム）" />
+      <h1 class="pixel">AI がラフを描き、<br />あなたが仕上げる。</h1>
+      <p class="lead">16×16・32×32・64×64 のドット絵エディタ。お題を書けば DeepSeek が下絵を描き、そのまま自分の手で直せます。Claude から MCP で操作することも。</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">⬇ Windows版をダウンロード</a>
+        <a class="btn" href="https://github.com/motchan2000/pixel-ai-editor">GitHub で見る</a>
+      </div>
+      <p class="note">Windows 10/11 (x64)・無料・MIT ライセンス／AI 機能には DeepSeek の APIキーが必要です</p>
+      <div class="shot"><img src="screenshot.png" alt="エディタの画面。中央のキャンバスに緑のスライムのドット絵、右側に AI ラフ生成とカラーパレットのパネル" /></div>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <h2 class="pixel">特長</h2>
+        <p class="sub">下絵づくりは AI に任せて、こだわりたい部分だけ自分で。</p>
+        <div class="features">
+          <div class="card"><div class="ic">🤖</div><h3>AI ラフ生成</h3><p>「青い剣を持った騎士」のように書くだけで、指定サイズ・色数のドット絵がキャンバスに置かれます。</p></div>
+          <div class="card"><div class="ic">✏️</div><h3>手直しツール一式</h3><p>ペン・消しゴム・塗りつぶし・スポイト・直線・四角・左右対称・反転・Undo/Redo。</p></div>
+          <div class="card"><div class="ic">🫥</div><h3>下絵モード</h3><p>AI のラフを半透明で重ねて表示。上からなぞって自分の線で描き直せます。</p></div>
+          <div class="card"><div class="ic">🔌</div><h3>MCP 対応</h3><p>Claude Code / Claude Desktop から描画・確認・書き出し。起動中のアプリにリアルタイムで反映。</p></div>
+          <div class="card"><div class="ic">🖼️</div><h3>PNG 書き出し</h3><p>等倍・×8・×16 で書き出し。作業途中はプロジェクトファイルで保存できます。</p></div>
+          <div class="card"><div class="ic">🔒</div><h3>キーはローカルに</h3><p>APIキーはあなたの PC にだけ保存。通信は DeepSeek API とだけ行います。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="wrap">
+        <h2 class="pixel">はじめかた</h2>
+        <p class="sub">インストールから最初の 1 枚まで、数分で。</p>
+        <ol class="steps">
+          <li><b>インストーラーをダウンロードして実行</b><span><a href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">Releases</a> の <code>Pixel-AI-Editor-Setup-x.y.z.exe</code>。SmartScreen の警告が出たら「詳細情報」→「実行」。</span></li>
+          <li><b>DeepSeek の APIキーを設定</b><span><a href="https://platform.deepseek.com/api_keys">platform.deepseek.com</a> でキーを作り、アプリ右下の「APIキー設定」に貼り付けて保存。</span></li>
+          <li><b>サイズを選んでお題を入力</b><span>16 / 32 / 64 から選び、「ラフを生成」。数秒〜1分ほどでキャンバスに下絵が届きます。</span></li>
+          <li><b>手直しして書き出し</b><span>気になるところを直して「PNG書き出し」。Ctrl+Z でいつでも戻れます。</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="mcp">
+      <div class="wrap">
+        <h2 class="pixel">Claude から描かせる（MCP）</h2>
+        <p class="sub">アプリ右側の「MCP連携」ボタンで、あなたの PC 用の登録設定をコピーできます。Node.js は不要です。</p>
+        <div class="mcp">
+          <div>
+            <pre><span class="c"># Claude Code に登録（アプリのボタンでコピーしたものを貼り付け）</span>
+<span class="p">&gt;</span> claude mcp add pixel-editor -s user \
+    -e ELECTRON_RUN_AS_NODE=1 -- \
+    "...\Pixel AI Editor.exe" "...\mcp-server.mjs"
+
+<span class="c"># あとは頼むだけ</span>
+<span class="p">&gt;</span> 32×32で宝箱のドット絵を描いて。
+  描いたら確認して、影を足して仕上げて。</pre>
+          </div>
+          <div>
+            <p style="margin-top:0">Claude は文字グリッドでまとめて描き、<code>get_canvas</code> で画像を見ながら仕上げます。描かれた絵はそのままアプリで手直しでき、Ctrl+Z で 1 操作ずつ戻せます。</p>
+            <div class="tools">
+              <code>open_editor</code><code>get_canvas</code><code>new_canvas</code><code>draw_rows</code><code>set_pixels</code><code>fill</code><code>draw_line</code><code>draw_rect</code><code>clear_canvas</code><code>undo</code><code>redo</code><code>generate_rough</code><code>export_png</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span class="pixel">Pixel AI Editor</span>
+      <span>MIT License · <a href="https://github.com/motchan2000/pixel-ai-editor">GitHub</a> · <a href="https://github.com/motchan2000/pixel-ai-editor/issues">不具合の報告</a></span>
+    </div>
+  </footer>
+</body>
+</html>

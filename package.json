@@ -1,0 +1,69 @@
+{
+  "name": "pixel-ai-editor",
+  "version": "1.0.0",
+  "description": "DeepSeekがラフを描くドット絵エディタ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/parse.test.js",
+    "mcp": "node mcp-server.mjs",
+    "dist": "electron-builder --win nsis"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  },
+  "bin": {
+    "pixel-ai-editor-mcp": "mcp-server.mjs"
+  },
+  "productName": "Pixel AI Editor",
+  "author": "motchan2000",
+  "homepage": "https://motchan2000.github.io/pixel-ai-editor/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/motchan2000/pixel-ai-editor.git"
+  },
+  "build": {
+    "appId": "io.github.motchan2000.pixelaieditor",
+    "productName": "Pixel AI Editor",
+    "asar": false,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "deepseek.js",
+      "bridge.js",
+      "mcp-server.mjs",
+      "renderer/**",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "Pixel-AI-Editor-Setup-${version}.exe",
+      "shortcutName": "Pixel AI Editor"
+    },
+    "publish": null
+  }
+}

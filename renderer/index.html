@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'" />
+  <title>Pixel AI Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Pixel AI Editor</h1>
+    <div class="size-select">
+      <span>サイズ</span>
+      <button data-size="16" class="active">16</button>
+      <button data-size="32">32</button>
+      <button data-size="64">64</button>
+    </div>
+    <span id="mcp-badge" class="mcp-badge">MCP</span>
+    <div class="file-actions">
+      <button id="btn-open">開く</button>
+      <button id="btn-save-proj">保存</button>
+      <select id="export-scale" title="書き出し倍率">
+        <option value="1">×1</option>
+        <option value="8" selected>×8</option>
+        <option value="16">×16</option>
+      </select>
+      <button id="btn-export" class="primary">PNG書き出し</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="tools">
+      <button data-tool="pen" class="active" title="ペン (B)">✏️<span>ペン</span></button>
+      <button data-tool="eraser" title="消しゴム (E)">🩹<span>消しゴム</span></button>
+      <button data-tool="fill" title="塗りつぶし (G)">🪣<span>塗りつぶし</span></button>
+      <button data-tool="picker" title="スポイト (I / Alt+クリック)">💧<span>スポイト</span></button>
+      <button data-tool="line" title="直線 (L)">📏<span>直線</span></button>
+      <button data-tool="rect" title="四角 (R)">⬜<span>四角</span></button>
+      <hr />
+      <button id="btn-undo" title="元に戻す (Ctrl+Z)">↩️<span>戻す</span></button>
+      <button id="btn-redo" title="やり直し (Ctrl+Y)">↪️<span>進む</span></button>
+      <hr />
+      <label class="toggle"><input type="checkbox" id="chk-grid" checked /> グリッド</label>
+      <label class="toggle"><input type="checkbox" id="chk-mirror" /> 左右対称</label>
+      <hr />
+      <div class="shift">
+        <button data-shift="0,-1" title="上へ移動">▲</button>
+        <div>
+          <button data-shift="-1,0" title="左へ移動">◀</button>
+          <button data-shift="1,0" title="右へ移動">▶</button>
+        </div>
+        <button data-shift="0,1" title="下へ移動">▼</button>
+      </div>
+      <button id="btn-flip" title="左右反転">⇋<span>反転</span></button>
+      <button id="btn-clear" class="danger" title="全消去">🗑️<span>全消去</span></button>
+    </aside>
+
+    <section class="stage">
+      <canvas id="canvas"></canvas>
+      <div id="coords"></div>
+    </section>
+
+    <aside class="side">
+      <div class="panel">
+        <h2>🤖 DeepSeek でラフ生成</h2>
+        <textarea id="prompt" rows="3" placeholder="例: 青い剣を持った小さな騎士、正面向き"></textarea>
+        <div class="row">
+          <label>最大色数
+            <input type="number" id="max-colors" min="2" max="32" value="12" />
+          </label>
+          <button id="btn-generate" class="primary">ラフを生成</button>
+        </div>
+        <div id="gen-status" class="status"></div>
+        <div id="rough-actions" class="rough-actions hidden">
+          <img id="rough-thumb" alt="ラフ" />
+          <div>
+            <button id="btn-apply-rough">キャンバスに適用</button>
+            <label class="toggle"><input type="checkbox" id="chk-underlay" /> 下絵として表示</label>
+            <input type="range" id="underlay-opacity" min="10" max="90" value="40" title="下絵の濃さ" />
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🎨 カラー</h2>
+        <div class="row">
+          <input type="color" id="color" value="#000000" />
+          <code id="color-hex">#000000</code>
+        </div>
+        <h3>パレット（ラフ / 使用中の色）</h3>
+        <div id="palette" class="swatches"></div>
+        <h3>最近使った色</h3>
+        <div id="recent" class="swatches"></div>
+      </div>
+
+      <div class="panel small">
+        <h2>🔌 MCP連携（Claude から操作）</h2>
+        <div class="row wrap">
+          <button id="btn-copy-mcp-code">Claude Code 用コマンド</button>
+          <button id="btn-copy-mcp-desktop">Claude Desktop 用JSON</button>
+        </div>
+        <div id="mcp-copy-status" class="status"></div>
+      </div>
+
+      <div class="panel small">
+        <h2>🔑 APIキー設定</h2>
+        <div id="key-status" class="status"></div>
+        <div class="row">
+          <input type="password" id="api-key" placeholder="sk-..." />
+          <button id="btn-save-key">保存</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="editor.js"></script>
+  <script src="app.js"></script>
+  <script src="mcp.js"></script>
+</body>
+</html>
