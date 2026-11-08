@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel AI Editor</title>
+  <meta name="description" content="AI sketches the rough, you finish it. A 16/32/64px pixel art editor for Windows that works with any AI service and any MCP client." />
+  <meta property="og:title" content="Pixel AI Editor" />
+  <meta property="og:description" content="AI sketches the rough, you finish it — a pixel art editor with MCP support" />
+  <meta property="og:image" content="https://motchan2000.github.io/pixel-ai-editor/screenshot.png" />
+  <link rel="alternate" hreflang="ja" href="https://motchan2000.github.io/pixel-ai-editor/" />
+  <link rel="alternate" hreflang="en" href="https://motchan2000.github.io/pixel-ai-editor/en/" />
+  <link rel="icon" href="../favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #16171d;
+      --bg2: #1e1f26;
+      --panel: #262833;
+      --border: #363948;
+      --text: #e8e9f0;
+      --muted: #9ea3b8;
+      --accent: #ff5c8a;
+      --green: #38b764;
+      --blue: #4f7cff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    .pixel { font-family: "DotGothic16", monospace; letter-spacing: .02em; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+    nav { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+    nav img { width: 32px; height: 32px; image-rendering: pixelated; }
+    nav .name { font-size: 18px; }
+    nav .links { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+    nav .links a { color: var(--muted); text-decoration: none; }
+    nav .links a:hover { color: var(--text); }
+    nav .lang { border: 1px solid var(--border); border-radius: 999px; padding: 1px 10px; }
+
+    .hero { padding: 56px 0 40px; text-align: center; }
+    .hero img.logo { width: 112px; height: 112px; image-rendering: pixelated; }
+    .hero h1 { font-size: clamp(32px, 6vw, 56px); margin: 12px 0 8px; line-height: 1.2; }
+    .hero p.lead { font-size: clamp(16px, 2.4vw, 19px); color: var(--muted); margin: 0 auto 28px; max-width: 640px; }
+    .cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 8px; font-weight: 700; text-decoration: none;
+      border: 2px solid var(--border); color: var(--text); background: var(--panel);
+      transition: transform .1s, border-color .15s;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: var(--muted); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 0 #b83a60; }
+    .btn.primary:hover { border-color: var(--accent); }
+    .btn.primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #b83a60; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    .shot { margin: 40px auto 0; max-width: 960px; }
+    .shot img {
+      width: 100%; height: auto; display: block; border-radius: 10px;
+      border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0,0,0,.55);
+    }
+
+    section { padding: 64px 0; }
+    section h2 { font-size: clamp(24px, 4vw, 32px); margin: 0 0 8px; }
+    section .sub { color: var(--muted); margin: 0 0 32px; }
+
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+    .card .ic { font-size: 26px; }
+    .card h3 { margin: 8px 0 6px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .steps { counter-reset: step; display: grid; gap: 14px; padding: 0; margin: 0; list-style: none; }
+    .steps li {
+      counter-increment: step; position: relative; padding: 16px 18px 16px 64px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 16px; top: 14px;
+      width: 32px; height: 32px; display: grid; place-items: center;
+      background: var(--green); color: #fff; font-family: "DotGothic16", monospace; font-size: 18px;
+      box-shadow: 3px 3px 0 #1a6b3d;
+    }
+    .steps b { display: block; }
+    .steps span { color: var(--muted); font-size: 14px; }
+
+    .mcp { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .mcp > div { min-width: 0; }
+    pre {
+      margin: 0; background: #0f1015; border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px; overflow-x: auto; font-size: 13px; line-height: 1.6; color: #cfd3e3;
+      font-family: "Cascadia Code", Consolas, monospace;
+    }
+    pre .c { color: #6c7290; }
+    pre .p { color: var(--accent); }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .tools code {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+      padding: 3px 8px; font-size: 12px; color: var(--text);
+    }
+
+    footer { border-top: 1px solid var(--border); padding: 28px 0 40px; color: var(--muted); font-size: 13px; }
+    footer .wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; }
+
+    @media (max-width: 720px) {
+      nav .links a:not(.lang) { display: none; }
+      .mcp { grid-template-columns: 1fr; }
+      section { padding: 44px 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <nav>
+      <img src="../favicon.png" alt="" />
+      <span class="name pixel">Pixel AI Editor</span>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#start">Get started</a>
+        <a href="#mcp">MCP</a>
+        <a href="https://github.com/motchan2000/pixel-ai-editor">GitHub</a>
+        <a class="lang" href="../" hreflang="ja">日本語</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero wrap">
+      <img class="logo" src="../icon.png" alt="Pixel AI Editor icon: a pixel art slime" />
+      <h1 class="pixel">AI sketches the rough.<br />You make it yours.</h1>
+      <p class="lead">A pixel art editor for 16×16, 32×32 and 64×64 sprites. Describe what you want, let AI draw a first draft, then refine every pixel by hand. Any AI agent that speaks MCP can draw on the canvas too.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">⬇ Download for Windows</a>
+        <a class="btn" href="https://github.com/motchan2000/pixel-ai-editor">View on GitHub</a>
+      </div>
+      <p class="note">Windows 10/11 (x64) · Free · MIT license · AI features need an API key from your chosen service (local LLMs need none) · The app UI is currently in Japanese</p>
+      <div class="shot"><img src="../screenshot.png" alt="The editor: a green pixel art slime on the canvas, with AI rough generation and color palette panels on the right" /></div>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <h2 class="pixel">Features</h2>
+        <p class="sub">Let AI handle the first sketch. Spend your time on the details that matter.</p>
+        <div class="features">
+          <div class="card"><div class="ic">🤖</div><h3>AI rough drafts</h3><p>Type “a small knight holding a blue sword” and get a sprite at your chosen size and color count, right on the canvas.</p></div>
+          <div class="card"><div class="ic">🔀</div><h3>Bring your own AI</h3><p>DeepSeek, OpenAI, Claude, Gemini, OpenRouter, Ollama, LM Studio, or any OpenAI-compatible API.</p></div>
+          <div class="card"><div class="ic">✏️</div><h3>Full editing toolkit</h3><p>Pen, eraser, fill, eyedropper, line, rectangle, mirror drawing, flip, shift, and undo/redo.</p></div>
+          <div class="card"><div class="ic">🫥</div><h3>Tracing mode</h3><p>Show the AI draft as a semi-transparent underlay and redraw it in your own linework.</p></div>
+          <div class="card"><div class="ic">🔌</div><h3>MCP server built in</h3><p>Claude, Cursor, VS Code and other MCP clients can draw, inspect and export — live in the running app.</p></div>
+          <div class="card"><div class="ic">🔒</div><h3>Your keys stay local</h3><p>API keys are stored only on your PC. The app talks only to the AI service you pick.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="wrap">
+        <h2 class="pixel">Get started</h2>
+        <p class="sub">From install to your first sprite in a few minutes.</p>
+        <ol class="steps">
+          <li><b>Download and run the installer</b><span>Get <code>Pixel-AI-Editor-Setup-x.y.z.exe</code> from <a href="https://github.com/motchan2000/pixel-ai-editor/releases/latest">Releases</a>. The installer is unsigned, so if SmartScreen warns you, click “More info” → “Run anyway”.</span></li>
+          <li><b>Pick an AI service and add your key</b><span>In the “AI設定” (AI settings) panel at the bottom right, choose a service, paste your API key and save. Local servers like Ollama need no key.</span></li>
+          <li><b>Choose a size and describe your sprite</b><span>Pick 16, 32 or 64, type a prompt and press “ラフを生成” (Generate). The draft lands on the canvas in seconds to a minute.</span></li>
+          <li><b>Refine and export</b><span>Fix whatever you like, then press “PNG書き出し” (Export PNG) at 1×, 8× or 16×. Ctrl+Z always takes you back.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="mcp">
+      <div class="wrap">
+        <h2 class="pixel">Let your AI agent draw (MCP)</h2>
+        <p class="sub">The “MCP連携” panel copies a ready-made config for your PC. The installed app runs the MCP server itself — no Node.js needed.</p>
+        <div class="mcp">
+          <div>
+            <pre><span class="c"># Most clients (Claude Desktop, Cursor, Windsurf, Gemini CLI…)</span>
+{
+  "mcpServers": {
+    "pixel-editor": {
+      "command": "...\\Pixel AI Editor.exe",
+      "args": ["...\\mcp-server.mjs"],
+      "env": { "ELECTRON_RUN_AS_NODE": "1" }
+    }
+  }
+}
+
+<span class="c"># Then just ask</span>
+<span class="p">&gt;</span> Draw a 32×32 treasure chest. Check it,
+  then add shading to finish it.</pre>
+          </div>
+          <div>
+            <p style="margin-top:0">The agent paints whole sprites as a text grid, looks at the result with <code>get_canvas</code> (PNG + grid), and polishes it. Everything appears live in the editor, where you can keep editing and undo step by step.</p>
+            <div class="tools">
+              <code>open_editor</code><code>get_canvas</code><code>new_canvas</code><code>draw_rows</code><code>set_pixels</code><code>fill</code><code>draw_line</code><code>draw_rect</code><code>clear_canvas</code><code>undo</code><code>redo</code><code>generate_rough</code><code>export_png</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span class="pixel">Pixel AI Editor</span>
+      <span>MIT License · <a href="https://github.com/motchan2000/pixel-ai-editor">GitHub</a> · <a href="https://github.com/motchan2000/pixel-ai-editor/issues">Report a bug</a> · <a href="../" hreflang="ja">日本語</a></span>
+    </div>
+  </footer>
+</body>
+</html>

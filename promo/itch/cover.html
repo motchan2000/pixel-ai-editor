@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>cover</title>
+<style>
+  @font-face { font-family: DotGothic16; src: local("DotGothic16"); }
+  html, body { margin: 0; width: 630px; height: 500px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(circle at 70% 40%, rgba(255,92,138,.18), transparent 55%),
+      radial-gradient(circle at 20% 80%, rgba(56,183,100,.16), transparent 50%),
+      #16171d;
+    color: #e8e9f0;
+    font-family: "Segoe UI", sans-serif;
+    position: relative;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .icon {
+    position: absolute; left: 50%; top: 52px; transform: translateX(-50%);
+    width: 192px; height: 192px; image-rendering: pixelated;
+    filter: drop-shadow(0 10px 0 rgba(0,0,0,.35));
+  }
+  h1 {
+    position: absolute; left: 0; right: 0; top: 268px; margin: 0; text-align: center;
+    font-family: "DotGothic16", "Consolas", monospace; font-size: 54px; letter-spacing: 1px;
+    text-shadow: 4px 4px 0 #b83a60;
+  }
+  p {
+    position: absolute; left: 0; right: 0; top: 352px; margin: 0; text-align: center;
+    font-size: 22px; color: #c9cce0; font-weight: 600;
+  }
+  .chips {
+    position: absolute; left: 0; right: 0; bottom: 44px;
+    display: flex; justify-content: center; gap: 10px;
+  }
+  .chips span {
+    background: #262833; border: 2px solid #363948; border-radius: 6px;
+    padding: 6px 12px; font-size: 15px; font-weight: 700; color: #e8e9f0;
+  }
+  .chips span.hot { background: #ff5c8a; border-color: #ff5c8a; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <img class="icon" src="../../build/icon.png" alt="" />
+  <h1>Pixel AI Editor</h1>
+  <p>AI sketches the rough. You make it yours.</p>
+  <div class="chips">
+    <span>16 · 32 · 64 px</span>
+    <span>Any AI service</span>
+    <span class="hot">MCP ready</span>
+    <span>Free</span>
+  </div>
+</body>
+</html>
