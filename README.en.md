@@ -4,7 +4,7 @@
 
 [日本語](README.md) | **English**
 
-A pixel art editor for **16×16 / 32×32 / 64×64** sprites (Windows desktop app). AI sketches a rough draft from your prompt, and you refine it by hand.
+A pixel art editor for **16×16 to 512×512** sprites (16 / 32 / 64 / 128 / 256 / 512) (Windows desktop app). AI sketches a rough draft from your prompt, and you refine it by hand.
 It ships with an MCP server, so any MCP-capable AI agent (Claude, Cursor, VS Code, Gemini CLI, …) can draw on the canvas too.
 
 **🌐 Website:** https://motchan2000.github.io/pixel-ai-editor/en/
@@ -29,7 +29,8 @@ It ships with an MCP server, so any MCP-capable AI agent (Claude, Cursor, VS Cod
    - Keys are stored only on your PC, in `%APPDATA%\pixel-ai-editor\settings.json`.
 
 ## Usage
-1. Pick a size (16 / 32 / 64) at the top.
+1. Pick a size (16 / 32 / 64 / 128 / 256 / 512) at the top. Mouse wheel zooms, middle-drag or Space+drag pans, `0` fits the canvas.
+   - At 128 and above, AI roughs are generated at 64×64 and upscaled.
 2. Type a prompt in the right panel and press **ラフを生成** (Generate). The draft replaces the canvas (Ctrl+Z restores the previous drawing).
 3. Refine it with the tools. Turn on **下絵として表示** (Show as underlay) to trace the draft.
 4. Press **PNG書き出し** (Export PNG) or **保存** (Save project).
@@ -66,7 +67,7 @@ The installed app runs the MCP server itself, so Node.js is not required. Drawin
 |---|---|
 | `open_editor` | Launch / focus the editor |
 | `get_canvas` | Current sprite as a text grid + PNG image |
-| `new_canvas` | New 16/32/64 canvas |
+| `new_canvas` | New 16–512 canvas |
 | `draw_rows` | Draw a text grid with a palette (`.` = erase, `_` = keep) |
 | `set_pixels` / `fill` / `draw_line` / `draw_rect` | Fine-grained drawing |
 | `clear_canvas` / `undo` / `redo` | Clear and history |

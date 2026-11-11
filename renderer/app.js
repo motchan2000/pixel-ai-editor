@@ -10,7 +10,13 @@ const editor = new PixelEditor($('#canvas'), {
   onChange: () => renderPalette(),
   onPick: (c) => { setColor(c); setTool('pen'); },
   onColorUsed: (c) => pushRecent(c),
+  onView: () => updateZoomLabel(),
 });
+
+function updateZoomLabel() {
+  const z = editor.cell * 100;
+  $('#zoom-level').textContent = `${editor.size}×${editor.size}  ${z >= 100 ? Math.round(z) : z.toFixed(0)}%`;
+}
 
 // ---------- 色 ----------
 function setColor(c) {
@@ -57,6 +63,9 @@ $$('[data-shift]').forEach((b) => (b.onclick = () => {
 }));
 $('#chk-grid').onchange = (e) => { editor.showGrid = e.target.checked; editor.render(); };
 $('#chk-mirror').onchange = (e) => { editor.mirrorX = e.target.checked; editor.render(); };
+$('#btn-zoom-in').onclick = () => editor.zoomStep(1);
+$('#btn-zoom-out').onclick = () => editor.zoomStep(-1);
+$('#btn-zoom-fit').onclick = () => editor.fitToView();
 
 // 座標表示
 $('#canvas').addEventListener('pointermove', () => {
@@ -93,6 +102,9 @@ window.addEventListener('keydown', (e) => {
   if (e.ctrlKey) return;
   const map = { b: 'pen', p: 'pen', e: 'eraser', g: 'fill', i: 'picker', l: 'line', r: 'rect' };
   if (map[k]) setTool(map[k]);
+  if (k === '+' || k === '=' || k === ';') editor.zoomStep(1);
+  if (k === '-') editor.zoomStep(-1);
+  if (k === '0') editor.fitToView();
   if (k === 'm') { $('#chk-mirror').click(); }
 });
 
@@ -110,7 +122,9 @@ $('#btn-generate').onclick = async () => {
   const btn = $('#btn-generate');
   btn.disabled = true;
   const t0 = Date.now();
-  setStatus($('#gen-status'), `${size}×${size} を生成中…${size === 64 ? '（64は1分ほどかかることがあります）' : ''}`, 'busy');
+  const note = size > 64 ? '（64×64で生成して拡大します。1分ほどかかることがあります）'
+    : size === 64 ? '（64は1分ほどかかることがあります）' : '';
+  setStatus($('#gen-status'), `${size}×${size} を生成中…${note}`, 'busy');
   const res = await window.api.generate({ prompt, size, maxColors });
   btn.disabled = false;
   if (!res.ok) { setStatus($('#gen-status'), res.error, 'error'); return; }
@@ -166,7 +180,7 @@ $('#btn-open').onclick = async () => {
   if (!r.ok) return;
   try {
     const d = JSON.parse(r.json);
-    if (![16, 32, 64].includes(d.size) || !Array.isArray(d.pixels) || d.pixels.length !== d.size * d.size) throw new Error();
+    if (!window.PIXEL_SIZES.includes(d.size) || !Array.isArray(d.pixels) || d.pixels.length !== d.size * d.size) throw new Error();
     roughPalette = d.roughPalette || [];
     lastRough = null;
     editor.underlay = null;

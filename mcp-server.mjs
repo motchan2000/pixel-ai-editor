@@ -93,12 +93,14 @@ const wrap = (fn) => async (args) => {
 const color = z.string().describe('"#rrggbb" 形式の色');
 const colorOrErase = z.string().nullable().describe('"#rrggbb" 形式の色。null で透明（消去）');
 const coord = z.number().int().describe('ピクセル座標（左上が 0,0）');
+const sizeSchema = z.union([16, 32, 64, 128, 256, 512].map((n) => z.literal(n)));
 
 const server = new McpServer({ name: 'pixel-ai-editor', version: '1.0.0' }, {
   instructions:
-    'Pixel AI Editor（16/32/64px のドット絵エディタ）を操作します。操作は起動中のアプリに即座に反映され、ユーザーがそのまま手直しできます。' +
+    'Pixel AI Editor（16/32/64/128/256/512px のドット絵エディタ）を操作します。操作は起動中のアプリに即座に反映され、ユーザーがそのまま手直しできます。' +
     'まとまった絵を描くときは draw_rows（1文字=1ピクセルの文字列グリッド＋パレット）が効率的です。' +
-    '描いた後は get_canvas で画像を確認してから仕上げてください。各操作はアプリで Ctrl+Z で取り消せます。',
+    '描いた後は get_canvas で画像を確認してから仕上げてください。128px 以上では get_canvas の x/y/w/h で部分ごとに確認・描画すると効率的です。' +
+    '各操作はアプリで Ctrl+Z で取り消せます。',
 });
 
 server.registerTool('open_editor', {
@@ -112,12 +114,22 @@ server.registerTool('open_editor', {
 
 server.registerTool('get_canvas', {
   title: 'キャンバスを取得',
-  description: '現在の絵を、文字グリッド（rows + palette、"."は透明）と PNG 画像で返す。',
-  inputSchema: { include_image: z.boolean().optional().describe('PNG 画像も返すか（既定 true）') },
+  description:
+    '現在の絵を、文字グリッド（rows + palette、"."は透明）と PNG 画像で返す。x, y, w, h で範囲を指定できる。' +
+    '64px を超えるキャンバス全体では rows は既定で省略される（範囲指定時は返す）。',
+  inputSchema: {
+    include_image: z.boolean().optional().describe('PNG 画像も返すか（既定 true）'),
+    include_rows: z.boolean().optional().describe('文字グリッドを返すか（既定: 64px 以下か範囲指定時は true）'),
+    x: z.number().int().min(0).optional().describe('範囲の左上 x'),
+    y: z.number().int().min(0).optional().describe('範囲の左上 y'),
+    w: z.number().int().min(1).optional().describe('範囲の幅'),
+    h: z.number().int().min(1).optional().describe('範囲の高さ'),
+  },
   annotations: { readOnlyHint: true },
-}, wrap(async ({ include_image = true }) => {
-  const r = await call('get_canvas', { include_image });
-  const content = [{ type: 'text', text: JSON.stringify({ size: r.size, palette: r.palette, rows: r.rows, legend: r.legend }, null, 1) }];
+}, wrap(async ({ include_image = true, ...rest }) => {
+  const r = await call('get_canvas', { include_image, ...rest });
+  const { image, ...info } = r;
+  const content = [{ type: 'text', text: JSON.stringify(info, null, 1) }];
   if (r.image) content.push({ type: 'image', mimeType: 'image/png', data: r.image.replace(/^data:image\/png;base64,/, '') });
   return { content };
 }));
@@ -125,7 +137,7 @@ server.registerTool('get_canvas', {
 server.registerTool('new_canvas', {
   title: '新規キャンバス',
   description: '指定サイズの空のキャンバスにする（現在の絵は消える）。',
-  inputSchema: { size: z.union([z.literal(16), z.literal(32), z.literal(64)]).describe('16 / 32 / 64') },
+  inputSchema: { size: sizeSchema.describe('16 / 32 / 64 / 128 / 256 / 512') },
 }, wrap(async ({ size }) => text(await call('new_canvas', { size }))));
 
 server.registerTool('draw_rows', {
@@ -183,7 +195,7 @@ server.registerTool('generate_rough', {
   description: 'アプリの「AI設定」で選ばれている AI サービスでラフを生成し、キャンバスに適用する（数十秒かかることがある）。',
   inputSchema: {
     prompt: z.string().describe('描くもの（例: 赤いスライム）'),
-    size: z.union([z.literal(16), z.literal(32), z.literal(64)]).optional().describe('省略時は現在のサイズ'),
+    size: sizeSchema.optional().describe('省略時は現在のサイズ。128 以上は 64px で生成して拡大する'),
     max_colors: z.number().int().min(2).max(32).optional().describe('最大色数（既定 12）'),
   },
 }, wrap(async (args) => text(await call('generate_rough', args))));
@@ -193,7 +205,7 @@ server.registerTool('export_png', {
   description: '現在の絵を PNG ファイルに保存する。',
   inputSchema: {
     path: z.string().describe('保存先のファイルパス（.png）'),
-    scale: z.number().int().min(1).max(32).optional().describe('拡大倍率（既定 1）'),
+    scale: z.number().int().min(1).max(32).optional().describe('拡大倍率（既定 1。書き出し画像の一辺は最大 8192px）'),
   },
 }, wrap(async (args) => text(await call('export_png', args))));
 

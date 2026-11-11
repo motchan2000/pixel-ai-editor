@@ -91,16 +91,21 @@ main { flex: 1; display: flex; min-height: 0; }
   justify-content: center;
   position: relative;
   min-width: 0;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 50%, #262833, #1a1b21);
 }
 #canvas {
-  image-rendering: pixelated;
-  box-shadow: 0 6px 30px rgba(0,0,0,.5);
+  position: absolute;
+  inset: 0;
+  display: block;
   cursor: crosshair;
   touch-action: none;
 }
-#coords { position: absolute; bottom: 8px; left: 12px; color: var(--muted); font-size: 11px; }
+#coords { position: absolute; bottom: 8px; left: 12px; color: var(--muted); font-size: 11px; pointer-events: none; }
+#zoom-level { position: absolute; bottom: 8px; right: 12px; color: var(--muted); font-size: 11px; }
+.zoom { display: flex; gap: 4px; }
+.zoom button { flex: 1; }
 
 .side {
   width: 300px;

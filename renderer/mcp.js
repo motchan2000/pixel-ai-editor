@@ -1,6 +1,8 @@
 // MCP 経由の命令をエディタに反映する（main.js が executeJavaScript で呼ぶ）
 (() => {
   const CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?@^~!<>';
+  // 1文字=1色。足りなくなったら CJK 統合漢字を順に使う（大きいキャンバスでは色数が多くなるため）
+  const charFor = (i) => (i < CHARS.length ? CHARS[i] : String.fromCodePoint(0x4e00 + i - CHARS.length));
   const badge = () => document.querySelector('#mcp-badge');
 
   function flash(text) {
@@ -43,20 +45,23 @@
     flash(`MCP: ${label}`);
   }
 
-  function canvasText() {
+  // 範囲 (x0, y0, w, h) を文字グリッドにする
+  function canvasText(x0, y0, w, h) {
+    const n = editor.size;
     const map = new Map();
     const palette = {};
-    for (const c of editor.pixels) {
+    for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+      const c = editor.pixels[y * n + x];
       if (c && !map.has(c)) {
-        const ch = CHARS[map.size] || '?';
+        const ch = charFor(map.size);
         map.set(c, ch);
         palette[ch] = c;
       }
     }
-    const n = editor.size, rows = [];
-    for (let y = 0; y < n; y++) {
+    const rows = [];
+    for (let y = y0; y < y0 + h; y++) {
       let r = '';
-      for (let x = 0; x < n; x++) {
+      for (let x = x0; x < x0 + w; x++) {
         const c = editor.pixels[y * n + x];
         r += c ? map.get(c) : '.';
       }
@@ -72,16 +77,26 @@
       return { size: editor.size, current_color: editor.color, used_colors: editor.usedColors() };
     },
 
-    get_canvas({ include_image = true }) {
-      const { palette, rows } = canvasText();
-      const out = { size: editor.size, palette, rows, legend: '"." は透明' };
-      if (include_image) out.image = editor.toDataURL(Math.max(1, Math.floor(512 / editor.size)));
+    // x, y, w, h で範囲を指定できる。64px を超えるキャンバス全体は文字グリッドが巨大になるので既定で画像のみ
+    get_canvas({ include_image = true, include_rows, x, y, w, h }) {
+      const n = editor.size;
+      const region = x !== undefined || y !== undefined || w !== undefined || h !== undefined;
+      const x0 = Math.max(0, Math.min(n - 1, int(x ?? 0, 'x'))), y0 = Math.max(0, Math.min(n - 1, int(y ?? 0, 'y')));
+      const rw = Math.max(1, Math.min(n - x0, int(w ?? n - x0, 'w'))), rh = Math.max(1, Math.min(n - y0, int(h ?? n - y0, 'h')));
+      const out = { size: n };
+      if (region) out.region = { x: x0, y: y0, w: rw, h: rh };
+      if (include_rows ?? (region || n <= 64)) {
+        Object.assign(out, canvasText(x0, y0, rw, rh), { legend: '"." は透明' });
+      } else {
+        out.note = '64px を超えるため rows は省略しました。x, y, w, h で範囲を指定するか include_rows=true で取得できます。';
+      }
+      if (include_image) out.image = editor.toDataURL(Math.max(1, Math.floor(512 / Math.max(rw, rh))), x0, y0, rw, rh);
       return out;
     },
 
     new_canvas({ size }) {
       size = int(size, 'size');
-      if (![16, 32, 64].includes(size)) throw new Error('size は 16 / 32 / 64 のいずれかです');
+      if (!window.PIXEL_SIZES.includes(size)) throw new Error(`size は ${window.PIXEL_SIZES.join(' / ')} のいずれかです`);
       window.appResetForSize(size);
       flash(`MCP: ${size}×${size} 新規`);
       return { size };
@@ -169,7 +184,8 @@
     redo() { editor.redo(); flash('MCP: やり直し'); return { ok: true }; },
 
     png({ scale = 1 }) {
-      scale = Math.max(1, Math.min(32, int(scale, 'scale')));
+      // 書き出し画像は一辺 8192px まで
+      scale = Math.max(1, Math.min(32, Math.floor(8192 / editor.size), int(scale, 'scale')));
       return editor.toDataURL(scale);
     },
 

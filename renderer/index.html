@@ -14,6 +14,9 @@
       <button data-size="16" class="active">16</button>
       <button data-size="32">32</button>
       <button data-size="64">64</button>
+      <button data-size="128">128</button>
+      <button data-size="256">256</button>
+      <button data-size="512">512</button>
     </div>
     <span id="mcp-badge" class="mcp-badge">MCP</span>
     <div class="file-actions">
@@ -21,6 +24,8 @@
       <button id="btn-save-proj">保存</button>
       <select id="export-scale" title="書き出し倍率">
         <option value="1">×1</option>
+        <option value="2">×2</option>
+        <option value="4">×4</option>
         <option value="8" selected>×8</option>
         <option value="16">×16</option>
       </select>
@@ -43,6 +48,12 @@
       <label class="toggle"><input type="checkbox" id="chk-grid" checked /> グリッド</label>
       <label class="toggle"><input type="checkbox" id="chk-mirror" /> 左右対称</label>
       <hr />
+      <div class="zoom">
+        <button id="btn-zoom-out" title="縮小 (-)">－</button>
+        <button id="btn-zoom-in" title="拡大 (+)">＋</button>
+      </div>
+      <button id="btn-zoom-fit" title="全体表示 (0)">🔍<span>全体表示</span></button>
+      <hr />
       <div class="shift">
         <button data-shift="0,-1" title="上へ移動">▲</button>
         <div>
@@ -58,6 +69,7 @@
     <section class="stage">
       <canvas id="canvas"></canvas>
       <div id="coords"></div>
+      <div id="zoom-level" title="ホイール: 拡大縮小 / 中ボタン・スペース+ドラッグ: 移動"></div>
     </section>
 
     <aside class="side">

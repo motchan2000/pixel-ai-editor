@@ -24,4 +24,17 @@ assert.ok(r.pixels.slice(8).every((p) => p === null));
 assert.throws(() => parseRough('not json', 4));
 assert.throws(() => parseRough('{"palette":{},"rows":["...."]}', 4));
 
+// 大きいキャンバス用の拡大（ニアレストネイバー）
+{
+  const { upscale } = require('../ai.js');
+  const u = upscale({ size: 2, pixels: ['#000000', null, null, '#ffffff'], palette: ['#000000', '#ffffff'] }, 8);
+  assert.strictEqual(u.size, 8);
+  assert.strictEqual(u.pixels.length, 64);
+  assert.strictEqual(u.pixels[0], '#000000');
+  assert.strictEqual(u.pixels[3 * 8 + 3], '#000000');
+  assert.strictEqual(u.pixels[4], null);
+  assert.strictEqual(u.pixels[7 * 8 + 7], '#ffffff');
+  assert.strictEqual(u.pixels[4 * 8 + 4], '#ffffff');
+}
+
 console.log('all parse tests passed');

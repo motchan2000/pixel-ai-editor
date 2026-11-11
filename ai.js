@@ -184,14 +184,29 @@ async function callOnce(cfg, prompt, size, maxColors) {
 async function generateRough({ cfg, prompt, size, maxColors = 12 }) {
   if (!cfg) throw new Error('AI設定がありません');
   // キーが無くても OpenAI 互換はそのまま試す（ローカルサーバーはキー不要のため）。401 なら案内を出す
-  if (![16, 32, 64].includes(size)) throw new Error('サイズは16/32/64のいずれかです');
+  if (![16, 32, 64, 128, 256, 512].includes(size)) throw new Error('サイズは16/32/64/128/256/512のいずれかです');
+  // AI が1文字ずつ出力できるのは 64px 程度まで。大きいキャンバスは 64px で生成して整数倍に拡大する
+  const genSize = Math.min(size, 64);
+  let r;
   try {
-    return await callOnce(cfg, prompt, size, maxColors);
+    r = await callOnce(cfg, prompt, genSize, maxColors);
   } catch (e) {
     if (e.fatal) throw e;
     // JSON の崩れなどは1回だけ再試行
-    return await callOnce(cfg, prompt, size, maxColors);
+    r = await callOnce(cfg, prompt, genSize, maxColors);
   }
+  return genSize === size ? r : upscale(r, size);
 }
 
-module.exports = { PRESETS, generateRough, parseRough, normalizeColor };
+// ニアレストネイバーで size×size に拡大（size は r.size の整数倍）
+function upscale(r, size) {
+  const k = size / r.size;
+  const pixels = new Array(size * size);
+  for (let y = 0; y < size; y++) {
+    const sy = Math.floor(y / k) * r.size;
+    for (let x = 0; x < size; x++) pixels[y * size + x] = r.pixels[sy + Math.floor(x / k)];
+  }
+  return { size, pixels, palette: r.palette };
+}
+
+module.exports = { PRESETS, generateRough, parseRough, normalizeColor, upscale };
